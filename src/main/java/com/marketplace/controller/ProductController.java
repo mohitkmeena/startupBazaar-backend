@@ -27,49 +27,54 @@ public class ProductController {
     }
 
     @PostMapping("/products")
-    public ResponseEntity<ApiResponse> createProduct(@Valid @RequestBody ProductCreateRequest request,
+    public ResponseEntity<?> createProduct(@Valid @RequestBody ProductCreateRequest request,
                                                     @AuthenticationPrincipal UserPrincipal currentUser) {
         try {
-            ApiResponse response = productService.createProduct(request, currentUser.getUserId());
+            Map<String, Object> response = productService.createProduct(request, currentUser.getUserId());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(403).body(ApiResponse.success(e.getMessage()));
+            return ResponseEntity.status(403).body(ApiResponse.error(e.getMessage()));
         }
     }
 
     @GetMapping("/products")
-    public ResponseEntity<ApiResponse> getProducts(@RequestParam(required = false) String category,
+    public ResponseEntity<?> getProducts(@RequestParam(required = false) String category,
                                                   @RequestParam(required = false) String search,
                                                   @RequestParam(required = false) String location) {
-        ApiResponse response = productService.getProducts(category, search, location);
+        Map<String, Object> response = productService.getProducts(category, search, location);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/products/{productId}")
-    public ResponseEntity<ApiResponse> getProductDetails(@PathVariable String productId) {
+    public ResponseEntity<?> getProductDetails(@PathVariable String productId) {
         try {
-            ApiResponse response = productService.getProductDetails(productId);
+            Map<String, Object> response = productService.getProductDetails(productId);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(ApiResponse.success(e.getMessage()));
+            return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
         }
     }
 
     @GetMapping("/my-products")
-    public ResponseEntity<ApiResponse> getMyProducts(@AuthenticationPrincipal UserPrincipal currentUser) {
-        ApiResponse response = productService.getMyProducts(currentUser.getUserId());
+    public ResponseEntity<?> getMyProducts(@AuthenticationPrincipal UserPrincipal currentUser) {
+        Map<String, Object> response = productService.getMyProducts(currentUser.getUserId());
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<ApiResponse> getCategories() {
-        List<String> categories = Arrays.stream(ProductCategory.values())
-                .map(ProductCategory::getDisplayName)
+    public ResponseEntity<?> getCategories() {
+        List<Map<String, String>> categories = Arrays.stream(ProductCategory.values())
+                .map(category -> {
+                    Map<String, String> categoryMap = new HashMap<>();
+                    categoryMap.put("value", category.name());
+                    categoryMap.put("label", category.getDisplayName());
+                    return categoryMap;
+                })
                 .collect(Collectors.toList());
         
         Map<String, Object> response = new HashMap<>();
         response.put("categories", categories);
         
-        return ResponseEntity.ok(ApiResponse.data(response));
+        return ResponseEntity.ok(response);
     }
 }

@@ -33,7 +33,7 @@ public class OfferService {
         this.userService = userService;
     }
 
-    public ApiResponse createOffer(OfferCreateRequest request, String userId) {
+    public Map<String, Object> createOffer(OfferCreateRequest request, String userId) {
         User user = userService.findByUserId(userId);
         
         if (user.getRole() != UserRole.BUYER && user.getRole() != UserRole.BOTH) {
@@ -61,10 +61,10 @@ public class OfferService {
 
         offerRepository.save(offer);
 
-        return ApiResponse.success("Offer created successfully", Map.of("offer_id", offerId));
+        return Map.of("offer_id", offerId);
     }
 
-    public ApiResponse acceptOffer(String offerId, String userId) {
+    public Map<String, Object> acceptOffer(String offerId, String userId) {
         Offer offer = offerRepository.findByOfferId(offerId)
             .orElseThrow(() -> new RuntimeException("Offer not found"));
 
@@ -97,10 +97,10 @@ public class OfferService {
         response.put("seller_phone", seller.getPhone());
         response.put("seller_name", seller.getName());
 
-        return ApiResponse.success("Offer accepted successfully", response);
+        return response;
     }
 
-    public ApiResponse rejectOffer(String offerId, String userId) {
+    public Map<String, Object> rejectOffer(String offerId, String userId) {
         Offer offer = offerRepository.findByOfferId(offerId)
             .orElseThrow(() -> new RuntimeException("Offer not found"));
 
@@ -125,10 +125,10 @@ public class OfferService {
 
         offerRepository.save(offer);
 
-        return ApiResponse.success("Offer rejected successfully");
+        return Map.of("message", "Offer rejected successfully");
     }
 
-    public ApiResponse counterOffer(String offerId, CounterOfferRequest request, String userId) {
+    public Map<String, Object> counterOffer(String offerId, CounterOfferRequest request, String userId) {
         Offer offer = offerRepository.findByOfferId(offerId)
             .orElseThrow(() -> new RuntimeException("Offer not found"));
 
@@ -158,10 +158,10 @@ public class OfferService {
 
         offerRepository.save(offer);
 
-        return ApiResponse.success("Counter offer sent successfully");
+        return Map.of("message", "Counter offer sent successfully");
     }
 
-    public ApiResponse getReceivedOffers(String userId) {
+    public Map<String, Object> getReceivedOffers(String userId) {
         List<Offer> offers = offerRepository.findBySellerIdOrderByCreatedAtDesc(userId);
 
         // Add product details
@@ -170,10 +170,10 @@ public class OfferService {
                 .ifPresent(product -> offer.setProductId(product.getName())); // Reusing field for product name
         });
 
-        return ApiResponse.data(Map.of("offers", offers));
+        return Map.of("offers", offers);
     }
 
-    public ApiResponse getSentOffers(String userId) {
+    public Map<String, Object> getSentOffers(String userId) {
         List<Offer> offers = offerRepository.findByBuyerIdOrderByCreatedAtDesc(userId);
 
         // Add product details and seller contact for accepted offers
@@ -188,6 +188,6 @@ public class OfferService {
             }
         });
 
-        return ApiResponse.data(Map.of("offers", offers));
+        return Map.of("offers", offers);
     }
 }

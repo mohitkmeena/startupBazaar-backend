@@ -7,6 +7,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/favorites")
 public class FavoriteController {
@@ -18,33 +20,33 @@ public class FavoriteController {
     }
 
     @PostMapping("/{productId}")
-    public ResponseEntity<ApiResponse> addToFavorites(@PathVariable String productId,
+    public ResponseEntity<?> addToFavorites(@PathVariable String productId,
                                                      @AuthenticationPrincipal UserPrincipal currentUser) {
         try {
-            ApiResponse response = favoriteService.addToFavorites(productId, currentUser.getUserId());
+            Map<String, Object> response = favoriteService.addToFavorites(productId, currentUser.getUserId());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             if (e.getMessage().contains("not found")) {
-                return ResponseEntity.status(404).body(ApiResponse.success(e.getMessage()));
+                return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
             }
-            return ResponseEntity.badRequest().body(ApiResponse.success(e.getMessage()));
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
     }
 
     @DeleteMapping("/{productId}")
-    public ResponseEntity<ApiResponse> removeFromFavorites(@PathVariable String productId,
+    public ResponseEntity<?> removeFromFavorites(@PathVariable String productId,
                                                           @AuthenticationPrincipal UserPrincipal currentUser) {
         try {
-            ApiResponse response = favoriteService.removeFromFavorites(productId, currentUser.getUserId());
+            Map<String, Object> response = favoriteService.removeFromFavorites(productId, currentUser.getUserId());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(404).body(ApiResponse.success(e.getMessage()));
+            return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
         }
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse> getFavorites(@AuthenticationPrincipal UserPrincipal currentUser) {
-        ApiResponse response = favoriteService.getFavorites(currentUser.getUserId());
+    public ResponseEntity<?> getFavorites(@AuthenticationPrincipal UserPrincipal currentUser) {
+        Map<String, Object> response = favoriteService.getFavorites(currentUser.getUserId());
         return ResponseEntity.ok(response);
     }
 }

@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/offers")
 public class OfferController {
@@ -21,83 +23,83 @@ public class OfferController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse> createOffer(@Valid @RequestBody OfferCreateRequest request,
+    public ResponseEntity<?> createOffer(@Valid @RequestBody OfferCreateRequest request,
                                                   @AuthenticationPrincipal UserPrincipal currentUser) {
         try {
-            ApiResponse response = offerService.createOffer(request, currentUser.getUserId());
+            Map<String, Object> response = offerService.createOffer(request, currentUser.getUserId());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             if (e.getMessage().contains("Only buyers")) {
-                return ResponseEntity.status(403).body(ApiResponse.success(e.getMessage()));
+                return ResponseEntity.status(403).body(ApiResponse.error(e.getMessage()));
             }
             if (e.getMessage().contains("not found")) {
-                return ResponseEntity.status(404).body(ApiResponse.success(e.getMessage()));
+                return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
             }
-            return ResponseEntity.badRequest().body(ApiResponse.success(e.getMessage()));
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
     }
 
     @PostMapping("/{offerId}/accept")
-    public ResponseEntity<ApiResponse> acceptOffer(@PathVariable String offerId,
+    public ResponseEntity<?> acceptOffer(@PathVariable String offerId,
                                                   @AuthenticationPrincipal UserPrincipal currentUser) {
         try {
-            ApiResponse response = offerService.acceptOffer(offerId, currentUser.getUserId());
+            Map<String, Object> response = offerService.acceptOffer(offerId, currentUser.getUserId());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             if (e.getMessage().contains("not found")) {
-                return ResponseEntity.status(404).body(ApiResponse.success(e.getMessage()));
+                return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
             }
             if (e.getMessage().contains("Only seller")) {
-                return ResponseEntity.status(403).body(ApiResponse.success(e.getMessage()));
+                return ResponseEntity.status(403).body(ApiResponse.error(e.getMessage()));
             }
-            return ResponseEntity.badRequest().body(ApiResponse.success(e.getMessage()));
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
     }
 
     @PostMapping("/{offerId}/reject")
-    public ResponseEntity<ApiResponse> rejectOffer(@PathVariable String offerId,
+    public ResponseEntity<?> rejectOffer(@PathVariable String offerId,
                                                   @AuthenticationPrincipal UserPrincipal currentUser) {
         try {
-            ApiResponse response = offerService.rejectOffer(offerId, currentUser.getUserId());
+            Map<String, Object> response = offerService.rejectOffer(offerId, currentUser.getUserId());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             if (e.getMessage().contains("not found")) {
-                return ResponseEntity.status(404).body(ApiResponse.success(e.getMessage()));
+                return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
             }
             if (e.getMessage().contains("Only seller")) {
-                return ResponseEntity.status(403).body(ApiResponse.success(e.getMessage()));
+                return ResponseEntity.status(403).body(ApiResponse.error(e.getMessage()));
             }
-            return ResponseEntity.badRequest().body(ApiResponse.success(e.getMessage()));
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
     }
 
     @PostMapping("/{offerId}/counter")
-    public ResponseEntity<ApiResponse> counterOffer(@PathVariable String offerId,
+    public ResponseEntity<?> counterOffer(@PathVariable String offerId,
                                                    @Valid @RequestBody CounterOfferRequest request,
                                                    @AuthenticationPrincipal UserPrincipal currentUser) {
         try {
-            ApiResponse response = offerService.counterOffer(offerId, request, currentUser.getUserId());
+            Map<String, Object> response = offerService.counterOffer(offerId, request, currentUser.getUserId());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             if (e.getMessage().contains("not found")) {
-                return ResponseEntity.status(404).body(ApiResponse.success(e.getMessage()));
+                return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
             }
             if (e.getMessage().contains("Only seller")) {
-                return ResponseEntity.status(403).body(ApiResponse.success(e.getMessage()));
+                return ResponseEntity.status(403).body(ApiResponse.error(e.getMessage()));
             }
-            return ResponseEntity.badRequest().body(ApiResponse.success(e.getMessage()));
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
         }
     }
 
     @GetMapping("/received")
-    public ResponseEntity<ApiResponse> getReceivedOffers(@AuthenticationPrincipal UserPrincipal currentUser) {
-        ApiResponse response = offerService.getReceivedOffers(currentUser.getUserId());
+    public ResponseEntity<?> getReceivedOffers(@AuthenticationPrincipal UserPrincipal currentUser) {
+        Map<String, Object> response = offerService.getReceivedOffers(currentUser.getUserId());
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/sent")
-    public ResponseEntity<ApiResponse> getSentOffers(@AuthenticationPrincipal UserPrincipal currentUser) {
-        ApiResponse response = offerService.getSentOffers(currentUser.getUserId());
+    public ResponseEntity<?> getSentOffers(@AuthenticationPrincipal UserPrincipal currentUser) {
+        Map<String, Object> response = offerService.getSentOffers(currentUser.getUserId());
         return ResponseEntity.ok(response);
     }
 }

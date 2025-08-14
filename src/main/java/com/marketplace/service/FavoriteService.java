@@ -22,7 +22,7 @@ public class FavoriteService {
         this.productRepository = productRepository;
     }
 
-    public ApiResponse addToFavorites(String productId, String userId) {
+    public Map<String, Object> addToFavorites(String productId, String userId) {
         // Check if product exists
         Product product = productRepository.findByProductIdAndIsActiveTrue(productId)
             .orElseThrow(() -> new RuntimeException("Product not found"));
@@ -35,19 +35,19 @@ public class FavoriteService {
         Favorite favorite = new Favorite(userId, productId);
         favoriteRepository.save(favorite);
 
-        return ApiResponse.success("Product added to favorites");
+        return Map.of("message", "Product added to favorites");
     }
 
-    public ApiResponse removeFromFavorites(String productId, String userId) {
+    public Map<String, Object> removeFromFavorites(String productId, String userId) {
         if (!favoriteRepository.existsByUserIdAndProductId(userId, productId)) {
             throw new RuntimeException("Product not in favorites");
         }
 
         favoriteRepository.deleteByUserIdAndProductId(userId, productId);
-        return ApiResponse.success("Product removed from favorites");
+        return Map.of("message", "Product removed from favorites");
     }
 
-    public ApiResponse getFavorites(String userId) {
+    public Map<String, Object> getFavorites(String userId) {
         List<Favorite> favorites = favoriteRepository.findByUserId(userId);
         List<Product> favoriteProducts = new ArrayList<>();
 
@@ -60,6 +60,6 @@ public class FavoriteService {
                 });
         }
 
-        return ApiResponse.data(Map.of("favorites", favoriteProducts));
+        return Map.of("favorites", favoriteProducts);
     }
 }
