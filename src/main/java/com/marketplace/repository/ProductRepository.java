@@ -21,4 +21,39 @@ public interface ProductRepository extends MongoRepository<Product, String> {
     
     @Query("{ $and: [ { 'isActive': true }, { 'location': { $regex: ?0, $options: 'i' } } ] }")
     List<Product> findByLocationAndIsActiveTrue(String location);
+    @Query("""
+{ 
+  $and: [
+    { "isActive": true },
+    { "name": { $exists: true, $ne: null, $ne: "" } },
+    { "description": { $exists: true, $ne: null, $ne: "" } },
+    { "location": { $exists: true, $ne: null, $ne: "" } },
+    { $or: [
+        { ?0: null },
+        { ?0: "" },
+        { "category": ?0 }
+      ]
+    },
+    { $or: [
+        { ?1: null },
+        { ?1: "" },
+        { "name": { $regex: ?1, $options: "i" } },
+        { "description": { $regex: ?1, $options: "i" } }
+      ]
+    },
+    { $or: [
+        { ?2: null },
+        { ?2: "" },
+        { "location": { $regex: ?2, $options: "i" } }
+      ]
+    }
+  ]
+}
+""")
+    List<Product> findByFilters(String category, String search, String location);
+    
+    // Fallback method to get all active products with valid data
+    @Query("{ $and: [ { 'isActive': true }, { 'name': { $exists: true, $ne: null, $ne: '' } }, { 'description': { $exists: true, $ne: null, $ne: '' } }, { 'location': { $exists: true, $ne: null, $ne: '' } } ] }")
+    List<Product> findByIsActiveAndValidDataOrderByCreatedAtDesc();
+
 }
