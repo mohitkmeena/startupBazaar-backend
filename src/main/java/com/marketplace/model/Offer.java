@@ -25,6 +25,8 @@ public class Offer {
     private OfferStatus status;
     private Double counterAmount;
     private String counterMessage;
+    private String counterResponse; // "accepted", "rejected", or null
+    private String counterResponseMessage;
     
     @CreatedDate
     private LocalDateTime createdAt;
@@ -83,6 +85,12 @@ public class Offer {
 
     public String getCounterMessage() { return counterMessage; }
     public void setCounterMessage(String counterMessage) { this.counterMessage = counterMessage; }
+
+    public String getCounterResponse() { return counterResponse; }
+    public void setCounterResponse(String counterResponse) { this.counterResponse = counterResponse; }
+
+    public String getCounterResponseMessage() { return counterResponseMessage; }
+    public void setCounterResponseMessage(String counterResponseMessage) { this.counterResponseMessage = counterResponseMessage; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

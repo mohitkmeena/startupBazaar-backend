@@ -12,4 +12,5 @@ public interface OfferRepository extends MongoRepository<Offer, String> {
     Optional<Offer> findByOfferId(String offerId);
     List<Offer> findBySellerIdOrderByCreatedAtDesc(String sellerId);
     List<Offer> findByBuyerIdOrderByCreatedAtDesc(String buyerId);
+    List<Offer> findByProductIdOrderByCreatedAtDesc(String productId);
 }

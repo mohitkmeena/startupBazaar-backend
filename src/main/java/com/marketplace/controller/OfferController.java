@@ -102,4 +102,15 @@ public class OfferController {
         Map<String, Object> response = offerService.getSentOffers(currentUser.getUserId());
         return ResponseEntity.ok(response);
     }
+
+    @GetMapping("/product/{productId}")
+    public ResponseEntity<?> getOffersForProduct(@PathVariable String productId,
+                                               @AuthenticationPrincipal UserPrincipal currentUser) {
+        try {
+            Map<String, Object> response = offerService.getOffersForProduct(productId, currentUser.getUserId());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
 }

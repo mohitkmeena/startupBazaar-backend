@@ -9,6 +9,8 @@ public class CounterOfferRequest {
     private Double amount;
     
     private String message;
+    
+    private String responseType; // "accept", "reject", or null for seller counter
 
     // Constructors
     public CounterOfferRequest() {}
@@ -19,4 +21,7 @@ public class CounterOfferRequest {
 
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
+    
+    public String getResponseType() { return responseType; }
+    public void setResponseType(String responseType) { this.responseType = responseType; }
 }

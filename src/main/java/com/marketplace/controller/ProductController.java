@@ -1,20 +1,20 @@
 package com.marketplace.controller;
 
-import com.marketplace.dto.ApiResponse;
 import com.marketplace.dto.ProductCreateRequest;
-import com.marketplace.enums.ProductCategory;
-import com.marketplace.security.UserPrincipal;
+import com.marketplace.dto.ApiResponse;
 import com.marketplace.service.ProductService;
-import jakarta.validation.Valid;
+import com.marketplace.security.UserPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
+import java.util.List;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
+import com.marketplace.enums.ProductCategory;
 
 @RestController
 @RequestMapping("/api")
@@ -27,9 +27,15 @@ public class ProductController {
     }
 
     @PostMapping("/products")
-    public ResponseEntity<?> createProduct(@Valid @RequestBody ProductCreateRequest request,
+    public ResponseEntity<?> createProduct(@ModelAttribute ProductCreateRequest request,
+                                                    @RequestParam(value = "documents", required = false) List<MultipartFile> documents,
                                                     @AuthenticationPrincipal UserPrincipal currentUser) {
         try {
+            // If documents are passed as separate parameter, use them
+            if (documents != null && !documents.isEmpty()) {
+                request.setDocuments(documents);
+            }
+            
             Map<String, Object> response = productService.createProduct(request, currentUser.getUserId());
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {

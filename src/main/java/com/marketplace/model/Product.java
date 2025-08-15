@@ -4,9 +4,13 @@ import com.marketplace.enums.ProductCategory;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.ArrayList;
 
 @Document(collection = "products")
 public class Product {
@@ -25,19 +29,25 @@ public class Product {
     private Double profit;
     private String location;
     private String image;
-    private List<String> documents;
+    private String website;
+    private String imageS3Key;
+    
+    @Field("documents")
+    private Object documents; // Use Object to handle both String and List<DocumentInfo>
     
     @CreatedDate
     private LocalDateTime createdAt;
     
     private boolean isActive = true;
 
+
+
     // Constructors
     public Product() {}
 
     public Product(String productId, String sellerId, String sellerName, String sellerEmail,
                    String name, String description, ProductCategory category, Double revenue,
-                   Double askValue, Double profit, String location, String image, List<String> documents) {
+                   Double askValue, Double profit, String location, String website, String imageS3Key, List<DocumentInfo> documents) {
         this.productId = productId;
         this.sellerId = sellerId;
         this.sellerName = sellerName;
@@ -49,7 +59,8 @@ public class Product {
         this.askValue = askValue;
         this.profit = profit;
         this.location = location;
-        this.image = image;
+        this.website = website;
+        this.imageS3Key = imageS3Key;
         this.documents = documents;
     }
 
@@ -93,8 +104,43 @@ public class Product {
     public String getImage() { return image; }
     public void setImage(String image) { this.image = image; }
 
-    public List<String> getDocuments() { return documents; }
-    public void setDocuments(List<String> documents) { this.documents = documents; }
+    public String getWebsite() { return website; }
+    public void setWebsite(String website) { this.website = website; }
+
+    public String getImageS3Key() { return imageS3Key; }
+    public void setImageS3Key(String imageS3Key) { this.imageS3Key = imageS3Key; }
+
+    @SuppressWarnings("unchecked")
+    public List<DocumentInfo> getDocuments() { 
+        if (documents == null) {
+            return new ArrayList<>();
+        }
+        
+        if (documents instanceof List) {
+            return (List<DocumentInfo>) documents;
+        }
+        
+        // If it's a String, try to parse it
+        if (documents instanceof String) {
+            try {
+                ObjectMapper objectMapper = new ObjectMapper();
+                return objectMapper.readValue((String) documents, new TypeReference<List<DocumentInfo>>() {});
+            } catch (Exception e) {
+                // Failed to parse documents string
+                return new ArrayList<>();
+            }
+        }
+        
+        return new ArrayList<>();
+    }
+    
+    public void setDocuments(List<DocumentInfo> documents) { 
+        this.documents = documents; 
+    }
+    
+    public void setDocuments(Object documents) { 
+        this.documents = documents; 
+    }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

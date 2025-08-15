@@ -1,46 +1,38 @@
 package com.marketplace.dto;
 
 import com.marketplace.enums.ProductCategory;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.DecimalMin;
-import org.springframework.web.multipart.MultipartFile;
-
+import java.time.LocalDateTime;
 import java.util.List;
 
-public class ProductCreateRequest {
-    @NotBlank(message = "Name is required")
+public class ProductDisplayDto {
+    private String productId;
+    private String sellerId;
+    private String sellerName;
     private String name;
-    
-    @NotBlank(message = "Description is required")
     private String description;
-    
-    @NotNull(message = "Category is required")
     private ProductCategory category;
-    
-    @NotNull(message = "Revenue is required")
-    @DecimalMin(value = "0.0", message = "Revenue must be positive")
     private Double revenue;
-    
-    @NotNull(message = "Ask value is required")
-    @DecimalMin(value = "0.0", message = "Ask value must be positive")
     private Double askValue;
-    
-    @NotNull(message = "Profit is required")
-    @DecimalMin(value = "0.0", message = "Profit must be positive")
     private Double profit;
-    
-    @NotBlank(message = "Location is required")
     private String location;
-    
     private String website;
-    private MultipartFile image;
-    private List<MultipartFile> documents;
+    private String imageUrl;
+    private List<DocumentDisplayDto> documents;
+    private LocalDateTime createdAt;
+    private boolean isActive;
 
-    // Constructors
-    public ProductCreateRequest() {}
+    public ProductDisplayDto() {}
 
     // Getters and Setters
+    public String getProductId() { return productId; }
+    public void setProductId(String productId) { this.productId = productId; }
+
+    public String getSellerId() { return sellerId; }
+    public void setSellerId(String sellerId) { this.sellerId = sellerId; }
+
+    public String getSellerName() { return sellerName; }
+    public void setSellerName(String sellerName) { this.sellerName = sellerName; }
+
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
@@ -65,9 +57,15 @@ public class ProductCreateRequest {
     public String getWebsite() { return website; }
     public void setWebsite(String website) { this.website = website; }
 
-    public MultipartFile getImage() { return image; }
-    public void setImage(MultipartFile image) { this.image = image; }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
-    public List<MultipartFile> getDocuments() { return documents; }
-    public void setDocuments(List<MultipartFile> documents) { this.documents = documents; }
-}
+    public List<DocumentDisplayDto> getDocuments() { return documents; }
+    public void setDocuments(List<DocumentDisplayDto> documents) { this.documents = documents; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public boolean isActive() { return isActive; }
+    public void setIsActive(boolean active) { isActive = active; }
+} 

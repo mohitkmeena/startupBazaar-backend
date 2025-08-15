@@ -12,6 +12,10 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends MongoRepository<Product, String> {
     Optional<Product> findByProductIdAndIsActiveTrue(String productId);
+    
+    // Fallback method to find by either productId or id
+    @Query("{ $and: [ { 'isActive': true }, { $or: [ { 'productId': ?0 }, { '_id': ?0 } ] } ] }")
+    Optional<Product> findByProductIdOrIdAndIsActiveTrue(String productId);
     List<Product> findBySellerIdOrderByCreatedAtDesc(String sellerId);
     List<Product> findByIsActiveTrueOrderByCreatedAtDesc();
     List<Product> findByCategoryAndIsActiveTrueOrderByCreatedAtDesc(ProductCategory category);
@@ -55,5 +59,9 @@ public interface ProductRepository extends MongoRepository<Product, String> {
     // Fallback method to get all active products with valid data
     @Query("{ $and: [ { 'isActive': true }, { 'name': { $exists: true, $ne: null, $ne: '' } }, { 'description': { $exists: true, $ne: null, $ne: '' } }, { 'location': { $exists: true, $ne: null, $ne: '' } } ] }")
     List<Product> findByIsActiveAndValidDataOrderByCreatedAtDesc();
+    
+    // Method to get products without documents field to avoid conversion issues
+    @Query(value = "{ 'isActive': true }", fields = "{ 'documents': 0 }")
+    List<Product> findByIsActiveTrueWithoutDocuments();
 
 }
