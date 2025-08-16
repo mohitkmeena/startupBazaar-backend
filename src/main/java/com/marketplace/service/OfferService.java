@@ -2,6 +2,7 @@ package com.marketplace.service;
 
 import com.marketplace.dto.ApiResponse;
 import com.marketplace.dto.CounterOfferRequest;
+import com.marketplace.dto.CounterOfferResponseRequest;
 import com.marketplace.dto.OfferCreateRequest;
 import com.marketplace.enums.OfferStatus;
 import com.marketplace.enums.UserRole;
@@ -241,6 +242,80 @@ public class OfferService {
         }
         
         throw new RuntimeException("Invalid request");
+    }
+
+    public Map<String, Object> respondToCounterOffer(String offerId, CounterOfferResponseRequest request, String userId) {
+        Offer offer = offerRepository.findByOfferId(offerId)
+            .orElseThrow(() -> new RuntimeException("Offer not found"));
+
+        if (!offer.getBuyerId().equals(userId)) {
+            throw new RuntimeException("Only buyer can respond to counter offer");
+        }
+        
+        if (offer.getStatus() != OfferStatus.COUNTERED) {
+            throw new RuntimeException("No counter offer to respond to");
+        }
+        
+        if ("accept".equals(request.getResponseType())) {
+            // Buyer accepts counter offer
+            offer.setStatus(OfferStatus.COUNTER_ACCEPTED);
+            offer.setCounterResponse("accepted");
+            offer.setCounterResponseMessage(request.getMessage());
+            
+            // Add to history
+            if (offer.getHistory() == null) {
+                offer.setHistory(new ArrayList<>());
+            }
+            Map<String, Object> historyEntry = new HashMap<>();
+            historyEntry.put("action", "counter_accepted");
+            historyEntry.put("message", request.getMessage());
+            historyEntry.put("timestamp", LocalDateTime.now());
+            historyEntry.put("by", userId);
+            offer.getHistory().add(historyEntry);
+            
+            offerRepository.save(offer);
+            
+            // Get both buyer and seller details for contact exchange
+            User seller = userService.findByUserId(offer.getSellerId());
+            User buyer = userService.findByUserId(offer.getBuyerId());
+            
+            return Map.of(
+                "message", "Counter offer accepted successfully",
+                "buyer_contact", Map.of(
+                    "name", buyer.getName(),
+                    "email", buyer.getEmail(),
+                    "phone", buyer.getPhone()
+                ),
+                "seller_contact", Map.of(
+                    "name", seller.getName(),
+                    "email", seller.getEmail(),
+                    "phone", seller.getPhone()
+                )
+            );
+            
+        } else if ("reject".equals(request.getResponseType())) {
+            // Buyer rejects counter offer
+            offer.setStatus(OfferStatus.COUNTER_REJECTED);
+            offer.setCounterResponse("rejected");
+            offer.setCounterResponseMessage(request.getMessage());
+            
+            // Add to history
+            if (offer.getHistory() == null) {
+                offer.setHistory(new ArrayList<>());
+            }
+            Map<String, Object> historyEntry = new HashMap<>();
+            historyEntry.put("action", "counter_rejected");
+            historyEntry.put("message", request.getMessage());
+            historyEntry.put("timestamp", LocalDateTime.now());
+            historyEntry.put("by", userId);
+            offer.getHistory().add(historyEntry);
+            
+            offerRepository.save(offer);
+            
+            return Map.of("message", "Counter offer rejected successfully");
+        }
+        
+        throw new RuntimeException("Invalid response type");
     }
 
     public Map<String, Object> getReceivedOffers(String userId) {

@@ -2,6 +2,7 @@ package com.marketplace.controller;
 
 import com.marketplace.dto.ApiResponse;
 import com.marketplace.dto.CounterOfferRequest;
+import com.marketplace.dto.CounterOfferResponseRequest;
 import com.marketplace.dto.OfferCreateRequest;
 import com.marketplace.security.UserPrincipal;
 import com.marketplace.service.OfferService;
@@ -85,6 +86,24 @@ public class OfferController {
                 return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
             }
             if (e.getMessage().contains("Only seller")) {
+                return ResponseEntity.status(403).body(ApiResponse.error(e.getMessage()));
+            }
+            return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/{offerId}/counter/respond")
+    public ResponseEntity<?> respondToCounterOffer(@PathVariable String offerId,
+                                                   @Valid @RequestBody CounterOfferResponseRequest request,
+                                                   @AuthenticationPrincipal UserPrincipal currentUser) {
+        try {
+            Map<String, Object> response = offerService.respondToCounterOffer(offerId, request, currentUser.getUserId());
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("not found")) {
+                return ResponseEntity.status(404).body(ApiResponse.error(e.getMessage()));
+            }
+            if (e.getMessage().contains("Only buyer")) {
                 return ResponseEntity.status(403).body(ApiResponse.error(e.getMessage()));
             }
             return ResponseEntity.badRequest().body(ApiResponse.error(e.getMessage()));
